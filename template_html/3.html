@@ -1,0 +1,118 @@
+<html>
+  <head>
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
+    <link
+      rel="stylesheet"
+      as="style"
+      onload="this.rel='stylesheet'"
+      href="https://fonts.googleapis.com/css2?display=swap&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900&amp;family=Space+Grotesk%3Awght%40400%3B500%3B700"
+    />
+
+    <title>Stitch Design</title>
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64," />
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  </head>
+  <body>
+    <div
+      class="relative flex h-auto min-h-screen w-full flex-col bg-[#111418] dark group/design-root overflow-x-hidden"
+      style='font-family: "Space Grotesk", "Noto Sans", sans-serif;'
+    >
+      <div class="layout-container flex h-full grow flex-col">
+        <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#283039] px-10 py-3">
+          <div class="flex items-center gap-4 text-white">
+            <div class="size-4">
+              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 6H42L36 24L42 42H6L12 24L6 6Z" fill="currentColor"></path></svg>
+            </div>
+            <h2 class="text-white text-lg font-bold leading-tight tracking-[-0.015em]">AegisAI</h2>
+          </div>
+          <div class="flex flex-1 justify-end gap-8">
+            <div class="flex items-center gap-9">
+              <a class="text-white text-sm font-medium leading-normal" href="#">Home</a>
+              <a class="text-white text-sm font-medium leading-normal" href="#">Features</a>
+              <a class="text-white text-sm font-medium leading-normal" href="#">About</a>
+            </div>
+            <button
+              class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#283039] text-white text-sm font-bold leading-normal tracking-[0.015em]"
+            >
+              <span class="truncate">Download</span>
+            </button>
+          </div>
+        </header>
+        <div class="px-40 flex flex-1 justify-center py-5">
+          <div class="layout-content-container flex flex-col max-w-[960px] flex-1">
+            <h2 class="text-white tracking-light text-[28px] font-bold leading-tight px-4 text-center pb-3 pt-5">Emergency Assistance</h2>
+            <p class="text-white text-base font-normal leading-normal pb-3 pt-1 px-4 text-center">
+              AegisAI is here to help you through any crisis. Please describe your situation or select an option below.
+            </p>
+            <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
+              <label class="flex flex-col min-w-40 flex-1">
+                <input
+                  placeholder="Describe your emergency"
+                  class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-white focus:outline-0 focus:ring-0 border border-[#3b4754] bg-[#1b2127] focus:border-[#3b4754] h-14 placeholder:text-[#9cabba] p-[15px] text-base font-normal leading-normal"
+                  value=""
+                />
+              </label>
+            </div>
+            <div class="flex px-4 py-3 justify-center">
+              <button
+                class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#0b72da] text-white text-sm font-bold leading-normal tracking-[0.015em]"
+              >
+                <span class="truncate">Send</span>
+              </button>
+            </div>
+            <h3 class="text-white text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4">Or choose an emergency</h3>
+            <div class="flex gap-3 p-3 flex-wrap pr-4">
+              <div class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-xl bg-[#283039] pl-4 pr-4">
+                <p class="text-white text-sm font-medium leading-normal">Medical Emergency</p>
+              </div>
+              <div class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-xl bg-[#283039] pl-4 pr-4">
+                <p class="text-white text-sm font-medium leading-normal">Fire</p>
+              </div>
+              <div class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-xl bg-[#283039] pl-4 pr-4">
+                <p class="text-white text-sm font-medium leading-normal">Accident</p>
+              </div>
+              <div class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-xl bg-[#283039] pl-4 pr-4">
+                <p class="text-white text-sm font-medium leading-normal">Natural Disaster</p>
+              </div>
+              <div class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-xl bg-[#283039] pl-4 pr-4">
+                <p class="text-white text-sm font-medium leading-normal">Other</p>
+              </div>
+            </div>
+            <div class="w-full" style="height: 20px;"></div>
+            <div class="flex px-4 py-3 justify-center">
+              <button
+                class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#0b72da] text-white text-sm font-bold leading-normal tracking-[0.015em]"
+              >
+                <span class="truncate">Send Location / Contact Authorities</span>
+              </button>
+            </div>
+            <div class="px-4 py-3">
+              <div class="flex flex-col gap-3 rounded-xl bg-[#283039] px-4 py-3">
+                <div class="flex items-center gap-4 overflow-hidden">
+                  <div
+                    class="bg-center bg-no-repeat aspect-square bg-cover rounded-lg size-14 shrink-0"
+                    style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB56y6CrWOBR4HchEgoDPEMuR7rMbfXefPbTLb9DCEdHttnUey7FMaQ0hpZt836bcN7qHmpk_hJJk88ve3zUpabmiLn5SsEMLatuQo0RBgy1dKKNClDhrteMCTrtg-IOQt-h-iQPmau9GVPAN6Zx4To_WFiAgiXXIHl20Ru_UofAVY3P43MRNQMwe1FBEWMylUsKKspJ_nXOBHboMXM98q_DgD_PIHRDi8Zdr_f0bKgA-xvUf87A2BtpMY8D5UEi24b9P6CF9H_cYo");'
+                  ></div>
+                  <div class="flex-1">
+                    <p class="text-white text-base font-bold leading-tight truncate">AegisAI</p>
+                    <p class="text-[#9cabba] text-sm font-normal leading-normal truncate">Listening...</p>
+                  </div>
+                  <button class="flex shrink-0 items-center justify-center rounded-full size-10 bg-[#0b72da] text-white">
+                    <div class="text-inherit" data-icon="Play" data-size="20px" data-weight="fill">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" fill="currentColor" viewBox="0 0 256 256">
+                        <path
+                          d="M240,128a15.74,15.74,0,0,1-7.6,13.51L88.32,229.65a16,16,0,0,1-16.2.3A15.86,15.86,0,0,1,64,216.13V39.87a15.86,15.86,0,0,1,8.12-13.82,16,16,0,0,1,16.2.3L232.4,114.49A15.74,15.74,0,0,1,240,128Z"
+                        ></path>
+                      </svg>
+                    </div>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
