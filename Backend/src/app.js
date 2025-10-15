@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const authRoutes = require("./Routes/Auth");
+const authRoutes = require("./Routes/Auth.route");
 
 if (process.env.NODE_ENV !== "PRODUCTION") {
     require("dotenv").config({ path: "./Config/.env" });
