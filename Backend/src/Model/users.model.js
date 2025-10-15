@@ -2,27 +2,29 @@ const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
   {
-    Name: { type: String, required: [true, "Please Enter Your Name"] },
+    name: { 
+      type: String, 
+      required: [true, "Please Enter Your Name"] 
+    },
     email: {
       type: String,
       required: [true, "Please Enter Email.. "],
       unique: [true, "Please enter Unique Email Address"],
     },
-    phone: { type: Number, required: [true, "Please Enter phone number"] },
-    password: {
-      type: String,
-      required: [true, "Please enter the password..."],
+    phone: { 
+      type: Number, 
+      required: false
     },
     emergencyContact: [
       {
-        Name: { type: String },
+        name: { type: String },
         phone: { type: Number },
       },
     ],
     medicalInformation: {
       bloodType: { type: String },
-      allergies: [{ Name: { type: String } }],
-      conditions: [{ Name: { type: String } }],
+      allergies: [{ name: { type: String } }],
+      conditions: [{ name: { type: String } }],
     },
   },
   { timestamps: true }
