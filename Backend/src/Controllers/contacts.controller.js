@@ -3,17 +3,27 @@ const Contact = require("../Model/Contact.model");
 // Add emergency contact
 const addContact = async (req, res) => {
   try {
-    const { name, phone, email, relationship, priority, notes } = req.body;
+    const { userId, name, phone, email, relationship, priority, notes } = req.body;
 
-    if (!name || !phone || !relationship) {
+    if (!userId || !name || !phone || !relationship) {
       return res.status(400).json({
         success: false,
-        message: "Name, phone, and relationship are required",
+        message: "User ID, name, phone, and relationship are required",
+      });
+    }
+
+    // Verify user exists
+    const User = require("../Model/User");
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
       });
     }
 
     const existingContact = await Contact.findOne({
-      userId: req.user.id,
+      userId: userId,
       phone: phone,
     });
 
@@ -25,7 +35,7 @@ const addContact = async (req, res) => {
     }
 
     const contact = new Contact({
-      userId: req.user.id,
+      userId: userId,
       name,
       phone,
       email,
@@ -53,8 +63,17 @@ const addContact = async (req, res) => {
 // Get all contacts for user
 const getContacts = async (req, res) => {
   try {
+    const { userId } = req.query; // Get userId from query params
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: "User ID is required",
+      });
+    }
+
     const contacts = await Contact.find({
-      userId: req.user.id,
+      userId: userId,
       isActive: true,
     }).sort({ priority: 1, name: 1 });
 
@@ -75,12 +94,18 @@ const getContacts = async (req, res) => {
 // Update contact
 const updateContact = async (req, res) => {
   try {
-    const { name, phone, email, relationship, priority, notes, isActive } =
-      req.body;
+    const { userId, name, phone, email, relationship, priority, notes, isActive } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: "User ID is required",
+      });
+    }
 
     const contact = await Contact.findOne({
       _id: req.params.id,
-      userId: req.user.id,
+      userId: userId,
     });
 
     if (!contact) {
@@ -117,9 +142,18 @@ const updateContact = async (req, res) => {
 // Soft delete contact
 const deleteContact = async (req, res) => {
   try {
+    const { userId } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: "User ID is required",
+      });
+    }
+
     const contact = await Contact.findOne({
       _id: req.params.id,
-      userId: req.user.id,
+      userId: userId,
     });
 
     if (!contact) {

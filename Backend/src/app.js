@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const authRoutes = require("./Routes/Auth");
+const contactsRoutes = require("./Routes/contacts.route");
 
 if (process.env.NODE_ENV !== "PRODUCTION") {
     require("dotenv").config({ path: "./Config/.env" });
@@ -12,6 +13,7 @@ app.use(cors());
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/emergencies", contactsRoutes);
 
 // Test Route
 app.get("/", (req, res) => {
