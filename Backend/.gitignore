@@ -1,0 +1,13 @@
+<<<<<<< HEAD
+node_modules
+.env
+config/.env
+src/Config/.env
+
+# Google Cloud Credentials
+*-credentials.json
+google-credentials.json
+service-account*.json
+=======
+node_modules
+>>>>>>> 16b403b534d9bd4ad71116b0dc66e50215abc82a
