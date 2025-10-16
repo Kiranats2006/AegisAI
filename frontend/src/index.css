@@ -1,9 +1,6 @@
-/* Import Tailwind layers in the correct order */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-Global reset
+/* Global reset */
 html, body, #root {
   height: 100%;
   margin: 0;
@@ -12,7 +9,8 @@ html, body, #root {
 
 /* Optional background + text color */
 body {
-  @apply bg-gray-900 text-white; /* use bg-gray-900 instead of bg-background-dark for now */
+  background-color: #111827; /* bg-gray-900 equivalent */
+  color: white;
   font-family: 'Inter', sans-serif;
 }
 
