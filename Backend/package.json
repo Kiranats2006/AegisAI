@@ -1,0 +1,36 @@
+{
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "test": "jest --coverage --verbose",
+    "test:watch": "jest --watch",
+    "test:voice": "jest voice.controller.test.js"
+  },
+  "dependencies": {
+    "@google-cloud/speech": "^7.2.1",
+    "@google/generative-ai": "^0.24.1",
+    "@googlemaps/google-maps-services-js": "^3.4.2",
+    "axios": "^1.12.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "firebase-admin": "^13.5.0",
+    "mongoose": "^8.19.1",
+    "multer": "^2.0.2",
+    "twilio": "^5.10.3"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.10",
+    "supertest": "^7.0.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/config/"
+    ],
+    "testMatch": [
+      "**/__tests__/**/*.test.js"
+    ]
+  }
+}
