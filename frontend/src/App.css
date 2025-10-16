@@ -9,7 +9,7 @@ body {
   flex-direction: column;
   background-color: #0f2323; /* fallback dark background */
   color: #ffffff;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
 }
 
 #root {
@@ -23,10 +23,10 @@ body {
 /* Reuse glow utilities from index.css if needed here as well */
 .glow-effect {
   box-shadow: 0 0 15px 5px rgba(6, 249, 249, 0.2),
-              0 0 5px 1px rgba(6, 249, 249, 0.1);
+    0 0 5px 1px rgba(6, 249, 249, 0.1);
 }
 
 .glow-effect-sm {
   box-shadow: 0 0 8px 2px rgba(6, 249, 249, 0.1),
-              0 0 3px 1px rgba(6, 249, 249, 0.05);
+    0 0 3px 1px rgba(6, 249, 249, 0.05);
 }
