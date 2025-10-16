@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1760610453968" clover="3.2.0">
+  <project timestamp="1760610453969" name="All files">
+    <metrics statements="58" coveredstatements="56" conditionals="57" coveredconditionals="51" methods="7" coveredmethods="7" elements="122" coveredelements="114" complexity="0" loc="58" ncloc="58" packages="2" files="2" classes="2"/>
+    <package name="Controllers">
+      <metrics statements="53" coveredstatements="51" conditionals="57" coveredconditionals="51" methods="7" coveredmethods="7"/>
+      <file name="voice.controller.js" path="E:\AegisAI\Backend\src\Controllers\voice.controller.js">
+        <metrics statements="53" coveredstatements="51" conditionals="57" coveredconditionals="51" methods="7" coveredmethods="7"/>
+        <line num="1" count="1" type="stmt"/>
+        <line num="2" count="1" type="stmt"/>
+        <line num="5" count="1" type="stmt"/>
+        <line num="6" count="1" type="stmt"/>
+        <line num="13" count="17" type="stmt"/>
+        <line num="24" count="17" type="cond" truecount="2" falsecount="0"/>
+        <line num="25" count="16" type="stmt"/>
+        <line num="27" count="1" type="stmt"/>
+        <line num="33" count="1" type="stmt"/>
+        <line num="42" count="1" type="stmt"/>
+        <line num="43" count="18" type="stmt"/>
+        <line num="45" count="18" type="stmt"/>
+        <line num="46" count="18" type="cond" truecount="2" falsecount="0"/>
+        <line num="47" count="1" type="stmt"/>
+        <line num="52" count="17" type="cond" truecount="2" falsecount="0"/>
+        <line num="53" count="1" type="stmt"/>
+        <line num="61" count="16" type="cond" truecount="2" falsecount="0"/>
+        <line num="62" count="1" type="stmt"/>
+        <line num="69" count="15" type="stmt"/>
+        <line num="71" count="15" type="stmt"/>
+        <line num="74" count="15" type="stmt"/>
+        <line num="75" count="15" type="cond" truecount="1" falsecount="1"/>
+        <line num="77" count="15" type="cond" truecount="2" falsecount="0"/>
+        <line num="82" count="1" type="stmt"/>
+        <line num="83" count="14" type="cond" truecount="2" falsecount="0"/>
+        <line num="84" count="1" type="stmt"/>
+        <line num="85" count="13" type="cond" truecount="4" falsecount="0"/>
+        <line num="87" count="1" type="stmt"/>
+        <line num="88" count="12" type="cond" truecount="2" falsecount="2"/>
+        <line num="89" count="12" type="stmt"/>
+        <line num="93" count="15" type="stmt"/>
+        <line num="98" count="15" type="cond" truecount="2" falsecount="0"/>
+        <line num="102" count="15" type="cond" truecount="4" falsecount="0"/>
+        <line num="105" count="15" type="stmt"/>
+        <line num="116" count="15" type="stmt"/>
+        <line num="122" count="15" type="stmt"/>
+        <line num="124" count="14" type="cond" truecount="4" falsecount="0"/>
+        <line num="125" count="1" type="stmt"/>
+        <line num="135" count="13" type="stmt"/>
+        <line num="137" count="16" type="cond" truecount="2" falsecount="0"/>
+        <line num="138" count="16" type="cond" truecount="4" falsecount="0"/>
+        <line num="144" count="13" type="stmt"/>
+        <line num="146" count="16" type="cond" truecount="2" falsecount="0"/>
+        <line num="147" count="16" type="cond" truecount="4" falsecount="0"/>
+        <line num="151" count="16" type="stmt"/>
+        <line num="153" count="13" type="cond" truecount="2" falsecount="0"/>
+        <line num="154" count="13" type="stmt"/>
+        <line num="158" count="13" type="stmt"/>
+        <line num="170" count="1" type="stmt"/>
+        <line num="171" count="1" type="stmt"/>
+        <line num="179" count="0" type="stmt"/>
+        <line num="180" count="0" type="stmt"/>
+        <line num="188" count="1" type="stmt"/>
+      </file>
+    </package>
+    <package name="Routes">
+      <metrics statements="5" coveredstatements="5" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      <file name="voice.route.js" path="E:\AegisAI\Backend\src\Routes\voice.route.js">
+        <metrics statements="5" coveredstatements="5" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+        <line num="2" count="1" type="stmt"/>
+        <line num="3" count="1" type="stmt"/>
+        <line num="6" count="1" type="stmt"/>
+        <line num="8" count="1" type="stmt"/>
+      </file>
+    </package>
+  </project>
+</coverage>
