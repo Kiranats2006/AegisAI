@@ -14,46 +14,68 @@ const triggerEmergency = async (req, res) => {
       });
     }
 
-    // Trigger AI analysis
-    let aiAnalysis;
+    // Default fallback AI analysis (always safe)
+    const defaultAIAnalysis = {
+      classification: {
+        emergencyType: "other",
+        detectedEmergencyType: "emergency",
+        confidenceScore: 0.5,
+        reasoning: "AI analysis unavailable",
+        riskAssessment: "medium",
+        immediateActions: ["Call emergency services", "Ensure personal safety"]
+      },
+      guidance: {
+        emergencyType: "other",
+        detectedEmergencyType: "emergency",
+        steps: [
+          {
+            stepNumber: 1,
+            title: "Call Emergency Services",
+            description: "Dial local emergency number (911/112/100)",
+            estimatedTime: 30,
+            priority: "critical",
+            safetyNote: "Provide clear location and situation details"
+          }
+        ],
+        precautions: ["Stay calm", "Ensure personal safety first"],
+        monitoringInstructions: "Wait for professional help to arrive"
+      }
+    };
+
+    // Trigger AI analysis safely
+    let aiAnalysis = { ...defaultAIAnalysis };
     try {
       const analysisResponse = await analyzeEmergency(
         { body: { text, userContext } },
         { json: (data) => data }
       );
-      aiAnalysis = analysisResponse.data;
-    } catch (aiError) {
-      console.error("AI analysis failed:", aiError);
-      // Continue with basic emergency even if AI fails
+
+      // Normalize AI response structure
+      aiAnalysis = analysisResponse?.data || analysisResponse || {};
+      if (aiAnalysis.data) aiAnalysis = aiAnalysis.data;
+
+      // Merge with defaults to fill missing parts
       aiAnalysis = {
         classification: {
-          emergencyType: "other",
-          detectedEmergencyType: "emergency",
-          confidenceScore: 0.5,
-          reasoning: "AI analysis unavailable",
-          riskAssessment: "medium",
-          immediateActions: ["Call emergency services", "Ensure personal safety"]
+          ...defaultAIAnalysis.classification,
+          ...(aiAnalysis.classification || {})
         },
         guidance: {
-          emergencyType: "other",
-          detectedEmergencyType: "emergency",
-          steps: [
-            {
-              stepNumber: 1,
-              title: "Call Emergency Services",
-              description: "Dial local emergency number (911/112/100)",
-              estimatedTime: 30,
-              priority: "critical",
-              safetyNote: "Provide clear location and situation details"
-            }
-          ],
-          precautions: ["Stay calm", "Ensure personal safety first"],
-          monitoringInstructions: "Wait for professional help to arrive"
+          ...defaultAIAnalysis.guidance,
+          ...(aiAnalysis.guidance || {})
         }
       };
+
+      // Ensure steps array exists
+      if (!Array.isArray(aiAnalysis.guidance.steps) || aiAnalysis.guidance.steps.length === 0) {
+        aiAnalysis.guidance.steps = defaultAIAnalysis.guidance.steps;
+      }
+    } catch (aiError) {
+      console.error("AI analysis failed:", aiError);
+      aiAnalysis = { ...defaultAIAnalysis };
     }
 
-    // Format location data to match model structure
+    // Format location
     const formattedLocation = location ? {
       coordinates: location.coordinates || [],
       address: {
@@ -70,17 +92,13 @@ const triggerEmergency = async (req, res) => {
       timestamp: new Date()
     };
 
-    // Create emergency event in database
+    // Create emergency event
     const emergencyEvent = new EmergencyEvent({
       userId: userId,
       emergencyType: aiAnalysis.classification.emergencyType,
       status: 'active',
       severity: aiAnalysis.classification.riskAssessment,
-      
-      // Location data - now properly formatted
       location: formattedLocation,
-      
-      // AI analysis results
       aiAnalysis: {
         confidenceScore: aiAnalysis.classification.confidenceScore,
         detectedEmergencyType: aiAnalysis.classification.detectedEmergencyType,
@@ -88,29 +106,25 @@ const triggerEmergency = async (req, res) => {
         reasoning: aiAnalysis.classification.reasoning,
         timestamp: new Date()
       },
-
-      // Instructions from AI guidance
       instructions: aiAnalysis.guidance.steps.map((step, index) => ({
         stepNumber: index + 1,
-        title: step.title,
-        description: step.description,
-        estimatedTime: step.estimatedTime,
-        priority: step.priority,
-        safetyNote: step.safetyNote,
+        title: step.title || `Step ${index + 1}`,
+        description: step.description || "Follow instructions carefully",
+        estimatedTime: step.estimatedTime || 30,
+        priority: step.priority || "normal",
+        safetyNote: step.safetyNote || "",
         completed: false,
         aiGenerated: true
       })),
-
-      // Initialize empty notifications array
       notifications: []
     });
 
     await emergencyEvent.save();
 
-    // Start notification process
+    // Log notification trigger
     console.log(`Notification process triggered for emergency ${emergencyEvent._id}`);
-    
-    // Get user's emergency contacts
+
+    // Get emergency contacts (safe query)
     const contacts = await Contact.find({
       userId: userId,
       isActive: true
