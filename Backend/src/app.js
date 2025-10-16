@@ -4,8 +4,14 @@ const cors = require("cors");
 const authRoutes = require("./Routes/Auth.route");
 const contactsRoutes = require("./Routes/contacts.route");
 const aiRoutes = require("./Routes/ai.route");
+<<<<<<< HEAD
 const emergencyRoutes = require("./Routes/emergency.route");
 const voiceRoutes = require("./Routes/voice.route");
+=======
+const emergencyRoutes = require("./Routes/emergency.route")
+const notificationRoutes=require("./Routes/notification.route")
+
+>>>>>>> 16b403b534d9bd4ad71116b0dc66e50215abc82a
 
 if (process.env.NODE_ENV !== "PRODUCTION") {
   const path = require("path");
@@ -23,7 +29,11 @@ app.use("/api/auth", authRoutes);
 app.use("/api/emergencies", contactsRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/emergency", emergencyRoutes);
+<<<<<<< HEAD
 app.use("/api/voice", voiceRoutes);
+=======
+app.use("/api/notify", notificationRoutes);
+>>>>>>> 16b403b534d9bd4ad71116b0dc66e50215abc82a
 
 // Test Route
 app.get("/", (req, res) => {
