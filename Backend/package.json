@@ -8,12 +8,14 @@
   "dependencies": {
     "@google-cloud/speech": "^7.2.1",
     "@google/generative-ai": "^0.24.1",
+    "@googlemaps/google-maps-services-js": "^3.4.2",
+    "axios": "^1.12.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
-    "multer": "^2.0.2",
     "firebase-admin": "^13.5.0",
     "mongoose": "^8.19.1",
+    "multer": "^2.0.2",
     "twilio": "^5.10.3"
   },
   "devDependencies": {
