@@ -5,6 +5,7 @@ const authRoutes = require("./Routes/Auth.route");
 const contactsRoutes = require("./Routes/contacts.route");
 const aiRoutes = require("./Routes/ai.route");
 const emergencyRoutes = require("./Routes/emergency.route")
+const notificationRoutes=require("./Routes/notification.route")
 
 
 if (process.env.NODE_ENV !== "PRODUCTION") {
@@ -20,6 +21,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/emergencies", contactsRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/emergency", emergencyRoutes);
+app.use("/api/notify", notificationRoutes);
 
 // Test Route
 app.get("/", (req, res) => {

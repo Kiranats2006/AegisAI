@@ -13,7 +13,7 @@ const addContact = async (req, res) => {
     }
 
     // Verify user exists
-    const User = require("../Model/User");
+    const User = require("../Model/users.model");
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({
