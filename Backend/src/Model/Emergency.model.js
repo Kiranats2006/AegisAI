@@ -106,6 +106,10 @@ const EmergencySchema = new mongoose.Schema({
 
 // Index for geospatial queries and performance
 EmergencySchema.index({ userId: 1, createdAt: -1 });
-EmergencySchema.index({ status: 1, emergencyType: 1 });
+EmergencySchema.index({ userId: 1, status: 1 });
+EmergencySchema.index({ userId: 1, emergencyType: 1 });
+EmergencySchema.index({ userId: 1, severity: 1 });
+EmergencySchema.index({ createdAt: 1 });
+EmergencySchema.index({ status: 1, resolvedAt: 1 });
 
 module.exports = mongoose.model('EmergencyEvent', EmergencySchema);

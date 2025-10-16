@@ -305,7 +305,7 @@ const completeStep = async (req, res) => {
 // Get user's emergency history
 const getEmergencyHistory = async (req, res) => {
   try {
-    const { userId } = req.query;
+    const { userId, startDate, endDate, emergencyType, status, page = 1, limit = 20 } = req.query;
 
     if (!userId) {
       return res.status(400).json({
@@ -314,18 +314,81 @@ const getEmergencyHistory = async (req, res) => {
       });
     }
 
-    const emergencies = await EmergencyEvent.find({ userId: userId })
+    // Build filter object
+    const filter = { userId };
+    
+    // Date filter
+    if (startDate || endDate) {
+      filter.createdAt = {};
+      if (startDate) filter.createdAt.$gte = new Date(startDate);
+      if (endDate) filter.createdAt.$lte = new Date(endDate);
+    }
+
+    // Emergency type filter
+    if (emergencyType && emergencyType !== 'all') {
+      filter.emergencyType = emergencyType;
+    }
+
+    // Status filter
+    if (status && status !== 'all') {
+      filter.status = status;
+    }
+
+    // Pagination
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    
+    // Get emergencies with filtering and pagination
+    const emergencies = await EmergencyEvent.find(filter)
       .sort({ createdAt: -1 })
-      .limit(50);
+      .skip(skip)
+      .limit(parseInt(limit))
+      .populate('notifications.contactId', 'name phone relationship')
+      .lean();
+
+    // Get total count for pagination
+    const total = await EmergencyEvent.countDocuments(filter);
+
+    // Format response with resolution details
+    const formattedEmergencies = emergencies.map(emergency => ({
+      _id: emergency._id,
+      emergencyType: emergency.emergencyType,
+      status: emergency.status,
+      severity: emergency.severity,
+      createdAt: emergency.createdAt,
+      resolvedAt: emergency.resolvedAt,
+      location: emergency.location,
+      responseTime: emergency.responseTime,
+      resolutionDetails: {
+        resolutionNotes: emergency.resolutionNotes,
+        responseTime: emergency.responseTime,
+        duration: emergency.resolvedAt ? 
+          Math.floor((new Date(emergency.resolvedAt) - new Date(emergency.createdAt)) / 1000) : null,
+        stepsCompleted: emergency.instructions ? 
+          emergency.instructions.filter(step => step.completed).length : 0,
+        totalSteps: emergency.instructions ? emergency.instructions.length : 0
+      },
+      aiAnalysis: emergency.aiAnalysis ? {
+        confidenceScore: emergency.aiAnalysis.confidenceScore,
+        detectedEmergencyType: emergency.aiAnalysis.detectedEmergencyType,
+        riskAssessment: emergency.aiAnalysis.riskAssessment
+      } : null,
+      notificationsCount: emergency.notifications ? emergency.notifications.length : 0
+    }));
 
     res.json({
       success: true,
-      data: emergencies,
-      count: emergencies.length,
-      stats: {
-        active: emergencies.filter(e => e.status === 'active').length,
-        resolved: emergencies.filter(e => e.status === 'resolved').length,
-        cancelled: emergencies.filter(e => e.status === 'cancelled').length
+      data: formattedEmergencies,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(total / parseInt(limit)),
+        totalItems: total,
+        itemsPerPage: parseInt(limit)
+      },
+      summary: {
+        total,
+        active: await EmergencyEvent.countDocuments({ ...filter, status: 'active' }),
+        resolved: await EmergencyEvent.countDocuments({ ...filter, status: 'resolved' }),
+        cancelled: await EmergencyEvent.countDocuments({ ...filter, status: 'cancelled' })
       }
     });
 
@@ -339,10 +402,184 @@ const getEmergencyHistory = async (req, res) => {
   }
 };
 
+const getAnalyticsStats = async (req, res) => {
+  try {
+    const { userId, days = 30 } = req.query;
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: "User ID is required"
+      });
+    }
+
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - parseInt(days));
+
+    const filter = { 
+      userId, 
+      createdAt: { $gte: startDate } 
+    };
+
+    // Get all emergencies for the period
+    const emergencies = await EmergencyEvent.find(filter);
+
+    // Emergency Frequency Analysis
+    const frequencyByDay = await EmergencyEvent.aggregate([
+      { $match: filter },
+      {
+        $group: {
+          _id: {
+            $dateToString: { format: "%Y-%m-%d", date: "$createdAt" }
+          },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]);
+
+    // Response Times Analysis
+    const responseTimes = emergencies
+      .filter(e => e.responseTime && e.status === 'resolved')
+      .map(e => e.responseTime);
+
+    // Most Common Types
+    const typeDistribution = await EmergencyEvent.aggregate([
+      { $match: filter },
+      {
+        $group: {
+          _id: "$emergencyType",
+          count: { $sum: 1 },
+          avgResponseTime: { $avg: "$responseTime" },
+          resolvedCount: {
+            $sum: { $cond: [{ $eq: ["$status", "resolved"] }, 1, 0] }
+          }
+        }
+      },
+      { $sort: { count: -1 } }
+    ]);
+
+    // Success Rates
+    const totalEmergencies = emergencies.length;
+    const resolvedEmergencies = emergencies.filter(e => e.status === 'resolved').length;
+    const successRate = totalEmergencies > 0 ? (resolvedEmergencies / totalEmergencies) * 100 : 0;
+
+    // Severity Distribution
+    const severityDistribution = await EmergencyEvent.aggregate([
+      { $match: filter },
+      {
+        $group: {
+          _id: "$severity",
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    // Time-based patterns
+    const hourlyDistribution = await EmergencyEvent.aggregate([
+      { $match: filter },
+      {
+        $group: {
+          _id: { $hour: "$createdAt" },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]);
+
+    // Calculate statistics
+    const stats = {
+      overview: {
+        totalEmergencies,
+        resolvedEmergencies,
+        activeEmergencies: emergencies.filter(e => e.status === 'active').length,
+        successRate: Math.round(successRate * 100) / 100,
+        averageResponseTime: responseTimes.length > 0 ? 
+          Math.round(responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length) : 0,
+        minResponseTime: responseTimes.length > 0 ? Math.min(...responseTimes) : 0,
+        maxResponseTime: responseTimes.length > 0 ? Math.max(...responseTimes) : 0
+      },
+      frequency: {
+        daily: frequencyByDay,
+        totalLast30Days: totalEmergencies,
+        averagePerDay: totalEmergencies > 0 ? 
+          Math.round((totalEmergencies / parseInt(days)) * 100) / 100 : 0
+      },
+      responseTimes: {
+        average: responseTimes.length > 0 ? 
+          Math.round(responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length) : 0,
+        distribution: responseTimes,
+        bySeverity: await getResponseTimesBySeverity(filter)
+      },
+      emergencyTypes: {
+        distribution: typeDistribution,
+        mostCommon: typeDistribution.length > 0 ? typeDistribution[0] : null,
+        successRates: typeDistribution.map(type => ({
+          type: type._id,
+          successRate: type.count > 0 ? 
+            Math.round((type.resolvedCount / type.count) * 100 * 100) / 100 : 0,
+          total: type.count,
+          resolved: type.resolvedCount
+        }))
+      },
+      patterns: {
+        hourly: hourlyDistribution,
+        severity: severityDistribution,
+        byStatus: {
+          resolved: resolvedEmergencies,
+          active: emergencies.filter(e => e.status === 'active').length,
+          cancelled: emergencies.filter(e => e.status === 'cancelled').length
+        }
+      }
+    };
+
+    res.json({
+      success: true,
+      data: stats,
+      period: {
+        startDate,
+        endDate: new Date(),
+        days: parseInt(days)
+      }
+    });
+
+  } catch (error) {
+    console.error("Get analytics stats error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching analytics statistics",
+      error: error.message
+    });
+  }
+};
+
+// Helper function for response times by severity
+const getResponseTimesBySeverity = async (filter) => {
+  return await EmergencyEvent.aggregate([
+    { 
+      $match: { 
+        ...filter, 
+        status: "resolved",
+        responseTime: { $exists: true, $ne: null }
+      } 
+    },
+    {
+      $group: {
+        _id: "$severity",
+        averageResponseTime: { $avg: "$responseTime" },
+        minResponseTime: { $min: "$responseTime" },
+        maxResponseTime: { $max: "$responseTime" },
+        count: { $sum: 1 }
+      }
+    }
+  ]);
+};
+
 module.exports = {
   triggerEmergency,
   getEmergencyStatus,
   resolveEmergency,
   completeStep,
-  getEmergencyHistory
+  getEmergencyHistory,
+  getAnalyticsStats
 };
