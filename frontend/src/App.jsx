@@ -1,14 +1,13 @@
-import React from 'react'
-import { Routes, Route, useNavigate } from 'react-router-dom'
-import Header from './components/Header'
-import Hero from './components/Hero'
-import Features from './components/Features'
-import Footer from './components/Footer'
-import Dashboard from './components/Dashboard'
-import Chat from './components/Chat'
+import { Route, Routes, useNavigate } from "react-router-dom";
+import Chat from "./components/Chat";
+import Dashboard from "./components/Dashboard";
+import Features from "./components/Features";
+import Footer from "./components/Footer";
+import Header from "./components/Header";
+import Hero from "./components/Hero";
 
 export default function App() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -22,13 +21,13 @@ export default function App() {
       </main>
       <Footer />
     </div>
-  )
+  );
 }
 
 function Home({ navigate }) {
   return (
     <>
-      <Hero onStart={() => navigate('/dashboard')} />
+      <Hero onStart={() => navigate("/dashboard")} />
       <section className="py-20 sm:py-28">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
@@ -36,7 +35,8 @@ function Home({ navigate }) {
               Comprehensive AI Emergency Support
             </h2>
             <p className="mt-4 text-lg text-white/70">
-              AegisAI offers features to help you navigate emergencies effectively.
+              AegisAI offers features to help you navigate emergencies
+              effectively.
             </p>
           </div>
           <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
@@ -45,5 +45,5 @@ function Home({ navigate }) {
         </div>
       </section>
     </>
-  )
+  );
 }
