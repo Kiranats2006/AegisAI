@@ -1,34 +1,12 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>AegisAI – The Intelligent Shield</title>
-
-    <!-- Tailwind (demo mode, CDN). For production, configure Tailwind properly -->
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <script>
-      tailwind.config = {
-        darkMode: 'class',
-        theme: {
-          extend: {
-            colors: {
-              primary: '#06f9f9',
-              'background-light': '#f5f8f8',
-              'background-dark': '#0f2323',
-            },
-            fontFamily: { display: ['Inter', 'sans-serif'] },
-          },
-        },
-      }
-    </script>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap"
-      rel="stylesheet"
-    />
+    <meta charset="UTF-8" />
+    <link href="/src/styles.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AegisAI</title>
   </head>
-
-  <body class="bg-background-light dark:bg-background-dark font-display text-white/90">
+  <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

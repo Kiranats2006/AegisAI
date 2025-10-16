@@ -1,11 +1,7 @@
-/* Import Tailwind layers in the correct order */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-Global reset html,
-body,
-#root {
+/* Global reset */
+html, body, #root {
   height: 100%;
   margin: 0;
   padding: 0;
@@ -13,8 +9,9 @@ body,
 
 /* Optional background + text color */
 body {
-  @apply bg-gray-900 text-white; /* use bg-gray-900 instead of bg-background-dark for now */
-  font-family: "Inter", sans-serif;
+  background-color: #111827; /* bg-gray-900 equivalent */
+  color: white;
+  font-family: 'Inter', sans-serif;
 }
 
 /* Glow utilities */
@@ -25,5 +22,5 @@ body {
 
 .glow-effect-sm {
   box-shadow: 0 0 8px 2px rgba(6, 249, 249, 0.1),
-    0 0 3px 1px rgba(6, 249, 249, 0.05);
+              0 0 3px 1px rgba(6, 249, 249, 0.05);
 }
