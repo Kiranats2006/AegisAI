@@ -3,6 +3,7 @@ const cors = require("cors");
 
 const authRoutes = require("./Routes/Auth.route");
 const contactsRoutes = require("./Routes/contacts.route");
+const aiRoutes = require("./Routes/ai.route");
 
 
 if (process.env.NODE_ENV !== "PRODUCTION") {
@@ -16,6 +17,7 @@ app.use(cors());
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/emergencies", contactsRoutes);
+app.use("/api/ai", aiRoutes);
 
 // Test Route
 app.get("/", (req, res) => {
