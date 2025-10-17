@@ -5,9 +5,10 @@ const authRoutes = require("./Routes/Auth.route");
 const contactsRoutes = require("./Routes/contacts.route");
 const aiRoutes = require("./Routes/ai.route");
 const voiceRoutes = require("./Routes/voice.route");
-const emergencyRoutes = require("./Routes/emergency.route")
-const notificationRoutes=require("./Routes/notification.route")
-const locationRoutes=require("./Routes/location.route")
+const emergencyRoutes = require("./Routes/emergency.route");
+const notificationRoutes = require("./Routes/notification.route");
+const locationRoutes = require("./Routes/location.route");
+const userRoutes = require("./Routes/user.route");
 
 if (process.env.NODE_ENV !== "PRODUCTION") {
   const path = require("path");
@@ -22,14 +23,13 @@ app.use(cors());
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/user", userRoutes);
 app.use("/api/emergencies", contactsRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/emergency", emergencyRoutes);
 app.use("/api/voice", voiceRoutes);
 app.use("/api/notify", notificationRoutes);
 app.use("/api/location", locationRoutes);
-
-
 
 // Test Route
 app.get("/", (req, res) => {

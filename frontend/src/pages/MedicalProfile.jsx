@@ -1,67 +1,81 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from "react";
 
 const MedicalProfile = () => {
   const [medicalInfo, setMedicalInfo] = useState({
-    bloodType: '',
+    bloodType: "",
     allergies: [],
     conditions: [],
     medications: [],
-    emergencyNotes: ''
+    emergencyNotes: "",
   });
-  const [newAllergy, setNewAllergy] = useState('');
-  const [newCondition, setNewCondition] = useState('');
-  const [newMedication, setNewMedication] = useState('');
+  const [newAllergy, setNewAllergy] = useState("");
+  const [newCondition, setNewCondition] = useState("");
+  const [newMedication, setNewMedication] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const API_BASE_URL = 'http://localhost:5000';
+  const API_BASE_URL = "http://localhost:8080";
+  // import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     fetchMedicalInfo();
   }, []);
 
   const fetchMedicalInfo = async () => {
-  try {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      const user = JSON.parse(userData);
-      const medInfo = user.medicalInformation || {};
-      setMedicalInfo({
-        bloodType: medInfo.bloodType || '',
-        allergies: Array.isArray(medInfo.allergies) ? medInfo.allergies : [],
-        conditions: Array.isArray(medInfo.conditions) ? medInfo.conditions : [],
-        medications: Array.isArray(medInfo.medications) ? medInfo.medications : [],
-        emergencyNotes: medInfo.emergencyNotes || ''
-      });
+    try {
+      const userData = localStorage.getItem("user");
+      if (userData) {
+        const user = JSON.parse(userData);
+        const medInfo = user.medicalInformation || {};
+        setMedicalInfo({
+          bloodType: medInfo.bloodType || "",
+          allergies: Array.isArray(medInfo.allergies) ? medInfo.allergies : [],
+          conditions: Array.isArray(medInfo.conditions)
+            ? medInfo.conditions
+            : [],
+          medications: Array.isArray(medInfo.medications)
+            ? medInfo.medications
+            : [],
+          emergencyNotes: medInfo.emergencyNotes || "",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to fetch medical info:", error);
     }
-  } catch (error) {
-    console.error('Failed to fetch medical info:', error);
-  }
-};
-
+  };
 
   const updateMedicalInfo = async () => {
     setLoading(true);
     try {
+      const userData = localStorage.getItem("user");
+      if (!userData) {
+        alert("User not found. Please log in again.");
+        return;
+      }
+      const user = JSON.parse(userData);
+
       const response = await fetch(`${API_BASE_URL}/api/user/medical`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        body: JSON.stringify(medicalInfo)
+        body: JSON.stringify({
+          userId: user._id,
+          ...medicalInfo,
+        }),
       });
 
       if (response.ok) {
         // Update local storage
-        const userData = localStorage.getItem('user');
-        if (userData) {
-          const user = JSON.parse(userData);
-          user.medicalInformation = medicalInfo;
-          localStorage.setItem('user', JSON.stringify(user));
-        }
+        user.medicalInformation = medicalInfo;
+        localStorage.setItem("user", JSON.stringify(user));
+        alert("Medical profile updated successfully!");
+      } else {
+        const errorData = await response.json();
+        alert(`Failed to update medical profile: ${errorData.message}`);
       }
     } catch (error) {
-      console.error('Failed to update medical info:', error);
+      console.error("Failed to update medical info:", error);
     } finally {
       setLoading(false);
     }
@@ -71,14 +85,16 @@ const MedicalProfile = () => {
     if (newAllergy.trim()) {
       setMedicalInfo({
         ...medicalInfo,
-        allergies: [...medicalInfo.allergies, { name: newAllergy.trim() }]
+        allergies: [...medicalInfo.allergies, { name: newAllergy.trim() }],
       });
-      setNewAllergy('');
+      setNewAllergy("");
     }
   };
 
   const removeAllergy = (index) => {
-    const updatedAllergies = medicalInfo.allergies.filter((_, i) => i !== index);
+    const updatedAllergies = medicalInfo.allergies.filter(
+      (_, i) => i !== index
+    );
     setMedicalInfo({ ...medicalInfo, allergies: updatedAllergies });
   };
 
@@ -86,14 +102,16 @@ const MedicalProfile = () => {
     if (newCondition.trim()) {
       setMedicalInfo({
         ...medicalInfo,
-        conditions: [...medicalInfo.conditions, { name: newCondition.trim() }]
+        conditions: [...medicalInfo.conditions, { name: newCondition.trim() }],
       });
-      setNewCondition('');
+      setNewCondition("");
     }
   };
 
   const removeCondition = (index) => {
-    const updatedConditions = medicalInfo.conditions.filter((_, i) => i !== index);
+    const updatedConditions = medicalInfo.conditions.filter(
+      (_, i) => i !== index
+    );
     setMedicalInfo({ ...medicalInfo, conditions: updatedConditions });
   };
 
@@ -101,14 +119,19 @@ const MedicalProfile = () => {
     if (newMedication.trim()) {
       setMedicalInfo({
         ...medicalInfo,
-        medications: [...medicalInfo.medications, { name: newMedication.trim() }]
+        medications: [
+          ...medicalInfo.medications,
+          { name: newMedication.trim() },
+        ],
       });
-      setNewMedication('');
+      setNewMedication("");
     }
   };
 
   const removeMedication = (index) => {
-    const updatedMedications = medicalInfo.medications.filter((_, i) => i !== index);
+    const updatedMedications = medicalInfo.medications.filter(
+      (_, i) => i !== index
+    );
     setMedicalInfo({ ...medicalInfo, medications: updatedMedications });
   };
 
@@ -117,8 +140,12 @@ const MedicalProfile = () => {
       <div className="container mx-auto max-w-4xl">
         {/* Header */}
         <div className="bg-gray-900/90 backdrop-blur-lg rounded-2xl border-2 border-gray-700/80 p-8 shadow-2xl shadow-blue-500/20 mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Medical Profile</h1>
-          <p className="text-gray-300 text-lg">This information helps emergency responders provide better care</p>
+          <h1 className="text-4xl font-bold text-white mb-2">
+            Medical Profile
+          </h1>
+          <p className="text-gray-300 text-lg">
+            This information helps emergency responders provide better care
+          </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -129,7 +156,9 @@ const MedicalProfile = () => {
               <h3 className="text-xl font-bold text-white mb-4">Blood Type</h3>
               <select
                 value={medicalInfo.bloodType}
-                onChange={(e) => setMedicalInfo({...medicalInfo, bloodType: e.target.value})}
+                onChange={(e) =>
+                  setMedicalInfo({ ...medicalInfo, bloodType: e.target.value })
+                }
                 className="w-full px-4 py-3 bg-gray-800/80 border-2 border-gray-600 rounded-xl text-white focus:outline-none focus:border-blue-500"
               >
                 <option value="">Select Blood Type</option>
@@ -164,7 +193,10 @@ const MedicalProfile = () => {
               </div>
               <div className="space-y-2">
                 {medicalInfo.allergies.map((allergy, index) => (
-                  <div key={index} className="flex items-center justify-between bg-gray-800/50 p-3 rounded-lg">
+                  <div
+                    key={index}
+                    className="flex items-center justify-between bg-gray-800/50 p-3 rounded-lg"
+                  >
                     <span className="text-white">⚠️ {allergy.name}</span>
                     <button
                       onClick={() => removeAllergy(index)}
@@ -182,7 +214,9 @@ const MedicalProfile = () => {
           <div className="space-y-6">
             {/* Medical Conditions */}
             <div className="bg-gray-900/90 backdrop-blur-lg rounded-2xl border-2 border-gray-700/80 p-6">
-              <h3 className="text-xl font-bold text-white mb-4">Medical Conditions</h3>
+              <h3 className="text-xl font-bold text-white mb-4">
+                Medical Conditions
+              </h3>
               <div className="flex gap-2 mb-4">
                 <input
                   type="text"
@@ -200,7 +234,10 @@ const MedicalProfile = () => {
               </div>
               <div className="space-y-2">
                 {medicalInfo.conditions.map((condition, index) => (
-                  <div key={index} className="flex items-center justify-between bg-gray-800/50 p-3 rounded-lg">
+                  <div
+                    key={index}
+                    className="flex items-center justify-between bg-gray-800/50 p-3 rounded-lg"
+                  >
                     <span className="text-white">❤️ {condition.name}</span>
                     <button
                       onClick={() => removeCondition(index)}
@@ -215,7 +252,9 @@ const MedicalProfile = () => {
 
             {/* Medications */}
             <div className="bg-gray-900/90 backdrop-blur-lg rounded-2xl border-2 border-gray-700/80 p-6">
-              <h3 className="text-xl font-bold text-white mb-4">Current Medications</h3>
+              <h3 className="text-xl font-bold text-white mb-4">
+                Current Medications
+              </h3>
               <div className="flex gap-2 mb-4">
                 <input
                   type="text"
@@ -233,7 +272,10 @@ const MedicalProfile = () => {
               </div>
               <div className="space-y-2">
                 {medicalInfo.medications.map((medication, index) => (
-                  <div key={index} className="flex items-center justify-between bg-gray-800/50 p-3 rounded-lg">
+                  <div
+                    key={index}
+                    className="flex items-center justify-between bg-gray-800/50 p-3 rounded-lg"
+                  >
                     <span className="text-white">💊 {medication.name}</span>
                     <button
                       onClick={() => removeMedication(index)}
@@ -253,7 +295,9 @@ const MedicalProfile = () => {
           <h3 className="text-xl font-bold text-white mb-4">Emergency Notes</h3>
           <textarea
             value={medicalInfo.emergencyNotes}
-            onChange={(e) => setMedicalInfo({...medicalInfo, emergencyNotes: e.target.value})}
+            onChange={(e) =>
+              setMedicalInfo({ ...medicalInfo, emergencyNotes: e.target.value })
+            }
             placeholder="Any additional information for emergency responders..."
             rows="4"
             className="w-full px-4 py-3 bg-gray-800/80 border-2 border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 resize-none"
@@ -267,7 +311,7 @@ const MedicalProfile = () => {
             disabled={loading}
             className="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white text-lg font-bold rounded-xl hover:shadow-2xl hover:shadow-blue-500/40 transform hover:scale-105 transition-all duration-300 disabled:opacity-50"
           >
-            {loading ? 'Saving...' : 'Save Medical Profile'}
+            {loading ? "Saving..." : "Save Medical Profile"}
           </button>
         </div>
       </div>
