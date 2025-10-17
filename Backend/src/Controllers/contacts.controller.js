@@ -39,7 +39,7 @@ const addContact = async (req, res) => {
       name,
       phone,
       email,
-      relationship,
+      relationship: relationship.toLowerCase(),
       priority: priority || 3,
       notes,
     });
@@ -118,7 +118,7 @@ const updateContact = async (req, res) => {
     if (name) contact.name = name;
     if (phone) contact.phone = phone;
     if (email !== undefined) contact.email = email;
-    if (relationship) contact.relationship = relationship;
+    if (relationship) contact.relationship = relationship.toLowerCase();
     if (priority) contact.priority = priority;
     if (notes !== undefined) contact.notes = notes;
     if (isActive !== undefined) contact.isActive = isActive;

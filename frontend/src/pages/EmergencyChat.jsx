@@ -108,14 +108,24 @@ const EmergencyChat = ({ userId }) => {
 
     const triggerEmergencyProtocol = async (type, description) => {
     try {
+        const userId = localStorage.getItem("userId");
+
+          if (!userId) {
+            console.error("User ID missing in localStorage");
+            return;
+          }
         const response = await fetch(`${API_BASE_URL}/api/emergency/trigger`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                userId: localStorage.getItem("userId"),
-                text: description,
-                location: location,
-                userContext: `Emergency type: ${type}`
+              userId,
+              text: description,
+              location: location.latitude && location.longitude ? {
+                coordinates: [location.latitude, location.longitude],
+                address: {},
+                timestamp: new Date()
+              } : undefined,
+              userContext: `Emergency type: ${type}`
             })
         });
 
