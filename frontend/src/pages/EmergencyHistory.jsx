@@ -12,24 +12,27 @@ const EmergencyHistory = () => {
   }, []);
 
   const fetchEmergencyHistory = async () => {
-    try {
-      const userId = localStorage.getItem("userId");
-      const response = await fetch(`${API_BASE_URL}/api/emergency/history?userId=${userId}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setEmergencies(data);
+  try {
+    const userId = localStorage.getItem("userId");
+    const response = await fetch(`${API_BASE_URL}/api/emergency/history?userId=${userId}`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
       }
-    } catch (error) {
-      console.error('Failed to fetch emergency history:', error);
-    } finally {
-      setLoading(false);
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      // If your backend returns { history: [...] } instead of just [...], use:
+      setEmergencies(Array.isArray(data) ? data : Array.isArray(data.history) ? data.history : []);
     }
-  };
+  } catch (error) {
+    console.error('Failed to fetch emergency history:', error);
+    setEmergencies([]); // fallback
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const getStatusColor = (status) => {
     switch (status) {
