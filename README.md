@@ -8,8 +8,17 @@ An AI-powered emergency response platform where users can store medical profiles
 AegisAI combines emergency contact management with AI-powered emergency classification. Users create medical profiles and emergency contacts, and during emergencies, the system intelligently classifies the situation and notifies the right contacts with relevant medical information.
 
 ## Deployed Links
-- **Frontend**:
-- **Backend**:
+- **Frontend**: https://aegis-ai-pi.vercel.app/
+- **Backend**: https://aegisai-9xwi.onrender.com
+
+
+![alt text](image.png)
+
+![alt text](image-1.png)
+
+![alt text](image-2.png)
+
+![alt text](image-3.png)
 
 ## Tech Stack
 - **Frontend**: React, Tailwind CSS, Vite
@@ -74,6 +83,5 @@ AegisAI combines emergency contact management with AI-powered emergency classifi
 - Real-time location tracking
 - Integration with emergency services
 - Multi-language support
-- Wearable device integration
 
 
