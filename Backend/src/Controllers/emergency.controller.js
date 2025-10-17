@@ -66,6 +66,20 @@ const triggerEmergency = async (req, res) => {
         }
       };
 
+      const CONFIDENCE_THRESHOLD = 0.7;
+
+      // Only proceed if AI is confident
+      if (aiAnalysis.classification.confidenceScore < CONFIDENCE_THRESHOLD) {
+        console.warn("Low AI confidence — using fallback instructions, not notifying contacts yet");
+
+        // Optional: mark emergency type as "other" to avoid false alerts
+        aiAnalysis.classification.emergencyType = "other";
+        aiAnalysis.classification.detectedEmergencyType = "emergency";
+
+        // Replace guidance with safe default
+        aiAnalysis.guidance = defaultAIAnalysis.guidance;
+      }
+
       // Ensure steps array exists
       if (!Array.isArray(aiAnalysis.guidance.steps) || aiAnalysis.guidance.steps.length === 0) {
         aiAnalysis.guidance.steps = defaultAIAnalysis.guidance.steps;

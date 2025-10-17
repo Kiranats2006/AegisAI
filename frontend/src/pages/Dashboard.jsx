@@ -16,6 +16,9 @@ export default function Dashboard() {
         contactsReachable: 0
     });
     const [pulse, setPulse] = useState(false);
+    const [nearbyServices, setNearbyServices] = useState([]);
+    const [safetyScore, setSafetyScore] = useState(100);
+    const [isLoadingServices, setIsLoadingServices] = useState(false);
 
     const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://aegisai-9xwi.onrender.com';
     const navigate = useNavigate();
@@ -44,7 +47,7 @@ export default function Dashboard() {
         }
     }, [navigate]);
 
-    // Location tracking
+    // Location tracking with nearby services
     useEffect(() => {
         let watchId;
         if (tracking && navigator.geolocation) {
@@ -57,6 +60,10 @@ export default function Dashboard() {
                     };
                     setLocation(newLocation);
                     setPulse(true);
+                    
+                    // 🆕 FETCH NEARBY SERVICES WHEN LOCATION UPDATES
+                    fetchNearbyEmergencyServices(pos.coords.latitude, pos.coords.longitude);
+                    
                     setTimeout(() => setPulse(false), 2000);
                 },
                 (err) => console.error(err),
@@ -83,7 +90,6 @@ export default function Dashboard() {
                 return;
             }
 
-            // Your backend uses /api/emergencies for contacts (not /api/contacts)
             const response = await fetch(`${API_BASE_URL}/api/emergencies?userId=${userId}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -97,7 +103,6 @@ export default function Dashboard() {
                 const result = await response.json();
                 console.log('Fetched contacts result:', result);
 
-                // Handle different response structures
                 if (result.success && Array.isArray(result.data)) {
                     setEmergencyContacts(result.data);
                 } else if (Array.isArray(result)) {
@@ -108,12 +113,10 @@ export default function Dashboard() {
                 }
             } else {
                 console.error('Failed to fetch contacts:', response.status, response.statusText);
-                // Set empty array as fallback
                 setEmergencyContacts([]);
             }
         } catch (error) {
             console.error('Failed to fetch contacts:', error);
-            // Set empty array as fallback
             setEmergencyContacts([]);
         }
     };
@@ -131,7 +134,6 @@ export default function Dashboard() {
                 return;
             }
 
-            // Your backend uses /api/emergency/history with userId query parameter
             const response = await fetch(`${API_BASE_URL}/api/emergency/history?userId=${userId}&limit=5`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -145,7 +147,6 @@ export default function Dashboard() {
                 const result = await response.json();
                 console.log('Fetched history result:', result);
 
-                // Handle different response structures
                 if (result.success && Array.isArray(result.data)) {
                     setEmergencyHistory(result.data);
                 } else if (Array.isArray(result)) {
@@ -162,6 +163,66 @@ export default function Dashboard() {
             console.error('Failed to fetch emergency history:', error);
             setEmergencyHistory([]);
         }
+    };
+
+    const fetchNearbyEmergencyServices = async (lat, lng, radius = 3000) => {
+        try {
+            setIsLoadingServices(true);
+            const token = localStorage.getItem('token');
+            const response = await fetch(
+                `${API_BASE_URL}/api/location/nearby-services?lat=${lat}&lng=${lng}&radius=${radius}`,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+
+            console.log('Nearby services response:', response.status);
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log('Nearby services result:', result);
+                
+                if (result.success && Array.isArray(result.data)) {
+                    setNearbyServices(result.data);
+                    calculateSafetyScore(result.data);
+                    return result.data;
+                }
+            }
+            return [];
+        } catch (error) {
+            console.error('Failed to fetch nearby services:', error);
+            return [];
+        } finally {
+            setIsLoadingServices(false);
+        }
+    };
+
+    const calculateSafetyScore = (services) => {
+        if (!services || services.length === 0) {
+            setSafetyScore(40);
+            return;
+        }
+        
+        const hospitals = services.filter(s => s.type === 'hospital');
+        const police = services.filter(s => s.type === 'police');
+        const fireStations = services.filter(s => s.type === 'fire');
+        
+        let score = 100;
+        
+        if (hospitals.length === 0) score -= 30;
+        if (police.length === 0) score -= 20;
+        if (fireStations.length === 0) score -= 10;
+        
+        const closeServices = services.filter(s => s.distanceInMeters < 1000);
+        if (closeServices.length > 0) score += 15;
+        
+        const veryCloseServices = services.filter(s => s.distanceInMeters < 500);
+        if (veryCloseServices.length > 0) score += 10;
+        
+        setSafetyScore(Math.max(0, Math.min(100, score)));
     };
 
     const fetchStats = async () => {
@@ -181,7 +242,6 @@ export default function Dashboard() {
                 return;
             }
 
-            // Your backend uses /api/emergency/analytics/stats with userId query parameter
             const response = await fetch(`${API_BASE_URL}/api/emergency/analytics/stats?userId=${userId}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -196,7 +256,6 @@ export default function Dashboard() {
                 console.log('Fetched stats result:', result);
 
                 if (result.success && result.data) {
-                    // Map backend stats to frontend format
                     const backendStats = result.data;
                     setStats({
                         emergenciesThisMonth: backendStats.overview?.totalEmergencies || 0,
@@ -215,7 +274,6 @@ export default function Dashboard() {
                 }
             } else {
                 console.error('Failed to fetch stats:', response.status, response.statusText);
-                // Set default stats
                 setStats({
                     emergenciesThisMonth: 0,
                     responseTime: '0min',
@@ -224,7 +282,6 @@ export default function Dashboard() {
             }
         } catch (error) {
             console.error('Failed to fetch stats:', error);
-            // Set default stats
             setStats({
                 emergenciesThisMonth: 0,
                 responseTime: '0min',
@@ -234,7 +291,6 @@ export default function Dashboard() {
     };
 
     const setupNotifications = () => {
-        // Simulate real-time notifications
         const sampleNotifications = [
             { id: 1, type: 'system', message: 'Emergency contacts updated', time: '2 min ago', read: false },
             { id: 2, type: 'alert', message: 'Medical profile incomplete', time: '1 hour ago', read: true },
@@ -280,16 +336,13 @@ export default function Dashboard() {
                 if (result.success) {
                     setActiveEmergency(result.data?.emergency);
                 }
-                // Navigate to emergency chat regardless of API response
                 navigate('/chat');
             } else {
                 console.error('Failed to trigger emergency:', response.status);
-                // Still navigate to chat even if API fails
                 navigate('/chat');
             }
         } catch (error) {
             console.error('Failed to trigger emergency:', error);
-            // Still navigate to chat even if API fails
             navigate('/chat');
         }
     };
@@ -304,6 +357,14 @@ export default function Dashboard() {
         if (hour < 12) return 'Good Morning';
         if (hour < 17) return 'Good Afternoon';
         return 'Good Evening';
+    };
+
+    const openDirections = (service) => {
+        if (service.coordinates && service.coordinates.length === 2) {
+            window.open(`https://maps.google.com/?q=${service.coordinates[1]},${service.coordinates[0]}`, '_blank');
+        } else {
+            console.error('Invalid coordinates for service:', service);
+        }
     };
 
     return (
@@ -376,7 +437,7 @@ export default function Dashboard() {
                             </div>
 
                             {/* Status Grid */}
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                                 <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700">
                                     <div className="text-blue-400 text-sm font-medium">Location Tracking</div>
                                     <div className="text-white text-lg font-bold mt-1">
@@ -393,6 +454,12 @@ export default function Dashboard() {
                                     <div className="text-purple-400 text-sm font-medium">Medical Profile</div>
                                     <div className="text-white text-lg font-bold mt-1">
                                         {medicalInfo ? 'Complete' : 'Incomplete'}
+                                    </div>
+                                </div>
+                                <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700">
+                                    <div className="text-yellow-400 text-sm font-medium">Safety Score</div>
+                                    <div className="text-white text-lg font-bold mt-1">
+                                        {safetyScore}/100
                                     </div>
                                 </div>
                             </div>
@@ -416,6 +483,126 @@ export default function Dashboard() {
                                         Accuracy: ±{(location.accuracy || 0).toFixed(1)} meters
                                     </div>
                                 )}
+                            </div>
+                        </div>
+
+                        {/* Safety & Location Section */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            {/* Safety Monitor */}
+                            <div className="bg-gray-900/90 backdrop-blur-lg rounded-2xl border-2 border-gray-700/80 p-6">
+                                <h4 className="text-white font-bold text-xl mb-4 flex items-center gap-2">
+                                    <span className="text-green-400">🛡️</span>
+                                    Safety Monitor
+                                </h4>
+                                
+                                {/* Safety Score */}
+                                <div className={`p-4 rounded-xl border-2 mb-4 ${
+                                    safetyScore >= 70 ? 'border-green-500 bg-green-500/10' :
+                                    safetyScore >= 40 ? 'border-yellow-500 bg-yellow-500/10' :
+                                    'border-red-500 bg-red-500/10'
+                                }`}>
+                                    <div className="flex justify-between items-center mb-2">
+                                        <span className="text-white font-bold">Safety Score</span>
+                                        <span className={`text-lg font-bold ${
+                                            safetyScore >= 70 ? 'text-green-400' :
+                                            safetyScore >= 40 ? 'text-yellow-400' : 'text-red-400'
+                                        }`}>
+                                            {safetyScore}/100
+                                        </span>
+                                    </div>
+                                    <div className="w-full bg-gray-700 rounded-full h-3">
+                                        <div 
+                                            className={`h-3 rounded-full ${
+                                                safetyScore >= 70 ? 'bg-green-500' :
+                                                safetyScore >= 40 ? 'bg-yellow-500' : 'bg-red-500'
+                                            }`}
+                                            style={{ width: `${safetyScore}%` }}
+                                        ></div>
+                                    </div>
+                                    <div className="text-xs text-gray-400 mt-2">
+                                        {safetyScore >= 70 ? '✅ High safety area' :
+                                        safetyScore >= 40 ? '⚠️ Moderate safety' : '🚨 Low safety - be cautious'}
+                                    </div>
+                                </div>
+
+                                {/* Nearby Services Summary */}
+                                <div className="space-y-3">
+                                    <div className="flex justify-between items-center text-sm">
+                                        <span className="text-gray-400">Nearby Hospitals:</span>
+                                        <span className="text-white font-medium">
+                                            {nearbyServices.filter(s => s.type === 'hospital').length} found
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between items-center text-sm">
+                                        <span className="text-gray-400">Police Stations:</span>
+                                        <span className="text-white font-medium">
+                                            {nearbyServices.filter(s => s.type === 'police').length} found
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between items-center text-sm">
+                                        <span className="text-gray-400">Fire Stations:</span>
+                                        <span className="text-white font-medium">
+                                            {nearbyServices.filter(s => s.type === 'fire').length} found
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Nearby Services Widget */}
+                            <div className="bg-gray-900/90 backdrop-blur-lg rounded-2xl border-2 border-gray-700/80 p-6">
+                                <h4 className="text-white font-bold text-xl mb-4 flex items-center gap-2">
+                                    <span className="text-blue-400">📍</span>
+                                    Nearby Emergency Services
+                                    {isLoadingServices && (
+                                        <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+                                    )}
+                                </h4>
+                                
+                                <div className="space-y-3 max-h-60 overflow-y-auto">
+                                    {nearbyServices.slice(0, 4).map((service, index) => (
+                                        <div key={service.id || index} className="flex items-center justify-between p-3 bg-gray-800/50 rounded-xl border border-gray-700">
+                                            <div className="flex items-center gap-3">
+                                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                                                    service.type === 'hospital' ? 'bg-red-500/20' :
+                                                    service.type === 'police' ? 'bg-blue-500/20' : 'bg-orange-500/20'
+                                                }`}>
+                                                    <span className={
+                                                        service.type === 'hospital' ? 'text-red-400' :
+                                                        service.type === 'police' ? 'text-blue-400' : 'text-orange-400'
+                                                    }>
+                                                        {service.type === 'hospital' ? '🏥' :
+                                                        service.type === 'police' ? '👮' : '🚒'}
+                                                    </span>
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="text-white font-medium text-sm truncate">{service.name || 'Unknown Service'}</div>
+                                                    <div className="text-gray-400 text-xs">{service.distance}</div>
+                                                </div>
+                                            </div>
+                                            <button 
+                                                onClick={() => openDirections(service)}
+                                                className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-lg text-xs hover:bg-blue-500/30 transition-colors whitespace-nowrap"
+                                            >
+                                                Directions
+                                            </button>
+                                        </div>
+                                    ))}
+                                    {nearbyServices.length === 0 && !isLoadingServices && (
+                                        <div className="text-center py-4 text-gray-400">
+                                            {tracking ? 'No services found in your area' : 'Enable location tracking to see nearby services'}
+                                        </div>
+                                    )}
+                                    {isLoadingServices && (
+                                        <div className="text-center py-4 text-gray-400">
+                                            <div className="flex justify-center space-x-2">
+                                                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+                                                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                                                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                                            </div>
+                                            <p className="text-sm mt-2">Finding nearby services...</p>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
 
@@ -480,49 +667,6 @@ export default function Dashboard() {
                                     ))}
                                 </div>
                             </div>
-                        </div>
-
-                        {/* Recent Emergencies */}
-                        <div className="bg-gray-900/90 backdrop-blur-lg rounded-2xl border-2 border-gray-700/80 p-6">
-                            <div className="flex items-center justify-between mb-6">
-                                <h4 className="text-white font-bold text-xl">Recent Emergencies</h4>
-                                <Link to="/history" className="text-blue-400 hover:text-blue-300 text-sm font-medium">
-                                    View All →
-                                </Link>
-                            </div>
-                            {emergencyHistory.length === 0 ? (
-                                <div className="text-center py-8">
-                                    <div className="text-4xl mb-4">📊</div>
-                                    <p className="text-gray-400">No emergency history yet</p>
-                                </div>
-                            ) : (
-                                <div className="space-y-3">
-                                    {emergencyHistory.slice(0, 3).map((emergency, index) => (
-                                        <div key={emergency._id || index} className="flex items-center justify-between p-4 bg-gray-800/50 rounded-xl border border-gray-700">
-                                            <div className="flex items-center gap-3">
-                                                <div className="text-2xl">
-                                                    {emergency.emergencyType === 'medical' ? '🩺' :
-                                                        emergency.emergencyType === 'fire' ? '🔥' :
-                                                            emergency.emergencyType === 'accident' ? '🚗' : '🚨'}
-                                                </div>
-                                                <div>
-                                                    <div className="text-white font-medium capitalize">{emergency.emergencyType || 'Emergency'}</div>
-                                                    <div className="text-gray-400 text-sm">
-                                                        {new Date(emergency.createdAt || emergency.timestamp).toLocaleDateString('en-IN')}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                                                emergency.status === 'resolved' ? 'bg-green-500/20 text-green-400' :
-                                                    emergency.status === 'active' ? 'bg-red-500/20 text-red-400' :
-                                                        'bg-yellow-500/20 text-yellow-400'
-                                            }`}>
-                                                {emergency.status || 'unknown'}
-                                            </span>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
                         </div>
                     </div>
 
@@ -601,6 +745,10 @@ export default function Dashboard() {
                                 <div className="flex justify-between items-center">
                                     <span className="text-gray-400">Contacts Reachable</span>
                                     <span className="text-white font-bold">{stats.contactsReachable}/{emergencyContacts.length}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-400">Nearby Services</span>
+                                    <span className="text-white font-bold">{nearbyServices.length}</span>
                                 </div>
                             </div>
                         </div>

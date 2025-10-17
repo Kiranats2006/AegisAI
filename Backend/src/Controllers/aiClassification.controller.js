@@ -46,6 +46,9 @@ const classifyEmergency = async (req, res) => {
     - police: crimes, safety threats, suspicious activities  
     - natural_disaster: earthquakes, floods, storms
     - accident: car crashes, falls, industrial accidents
+    Example emergency situations:
+    - "My hair/clothes are on fire" → fire, detectedEmergencyType: "personal_fire"
+    - "There is a building fire" → fire, detectedEmergencyType: "building_fire"
     - other: anything else
 
     Respond with ONLY the JSON object, no other text.
@@ -187,6 +190,10 @@ const analyzeEmergency = async (req, res) => {
     - natural_disaster: earthquakes, floods, storms
     - accident: car crashes, falls, industrial accidents
     - other: anything else
+      Example emergency situations:
+    - "My hair/clothes are on fire" → fire, detectedEmergencyType: "personal_fire"
+    - "There is a building fire" → fire, detectedEmergencyType: "building_fire"
+
 
     Respond with ONLY the JSON object, no other text.
     `;
@@ -205,40 +212,42 @@ const analyzeEmergency = async (req, res) => {
     }
 
     const guidancePrompt = `
-    Provide emergency guidance for a ${classification.detectedEmergencyType} situation (${classification.emergencyType} emergency).
+      EMERGENCY GUIDANCE
 
-    ${userContext ? `Additional context: ${userContext}` : ''}
+      Situation: ${classification.detectedEmergencyType} (${classification.emergencyType})
 
-    Available standard procedures: ${specificProcedures.join(' | ')}
+      User context: ${userContext || "None"}
+      Available standard procedures: ${specificProcedures.length > 0 ? specificProcedures.join(' | ') : "None"}
 
-    Generate comprehensive step-by-step instructions including:
-    1. Immediate life-saving actions
-    2. Safety precautions for responder
-    3. When to call emergency services
-    4. What information to provide to dispatcher
-    5. Ongoing monitoring instructions
+      Instructions:
+      - This is based in india, only provide indian emergency numbers if needed.
+      - Provide 5-10 **actionable steps** (1-2 sentences max each).
+      - Each step must be **life-saving and clear**, not paragraphs.
+      - Include only necessary safety notes.
+      - Prioritize: immediate action first.
 
-    Return ONLY a JSON object with this structure:
-    {
-      "emergencyType": "${classification.emergencyType}",
-      "detectedEmergencyType": "${classification.detectedEmergencyType}",
-      "steps": [
-        {
-          "stepNumber": 1,
-          "title": "Clear action title",
-          "description": "Detailed instruction",
-          "estimatedTime": 30,
-          "priority": "critical|high|medium|low",
-          "safetyNote": "Important safety warning if any"
-        }
-      ],
-      "emergencyServicesContact": "When and how to contact emergency services",
-      "precautions": ["Array of safety precautions"],
-      "monitoringInstructions": "What to monitor while waiting for help"
-    }
+      Return ONLY a JSON object with this structure:
+      {
+        "emergencyType": "${classification.emergencyType}",
+        "detectedEmergencyType": "${classification.detectedEmergencyType}",
+        "steps": [
+          {
+            "stepNumber": 1,
+            "title": "Action title",
+            "description": "Short clear instruction",
+            "estimatedTime": 30,
+            "priority": "critical|high|medium|low",
+            "safetyNote": "Short safety warning if needed"
+          }
+        ],
+        "emergencyServicesContact": "When/how to call",
+        "precautions": ["Short critical safety tips"],
+        "monitoringInstructions": "What to watch while waiting for help"
+      }
 
-    Respond with ONLY the JSON object, no other text.
-    `;
+      Respond ONLY with the JSON object.
+      `;
+
 
     const guidanceResult = await guidanceModel.generateContent(guidancePrompt);
     const guidanceResponse = await guidanceResult.response;
