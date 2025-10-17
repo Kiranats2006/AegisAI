@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Testimonials from '../components/Testimonials';
 
+
 const LandingPage = () => {
   const [scrolled, setScrolled] = useState(false);
 
@@ -199,9 +200,7 @@ const LandingPage = () => {
         </div>
       </section>
 
-
       <Testimonials />
-
 
       {/* CTA Section */}
       <section className="py-20 px-4">
