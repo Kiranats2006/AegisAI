@@ -20,22 +20,24 @@ const MedicalProfile = () => {
   }, []);
 
   const fetchMedicalInfo = async () => {
-    try {
-      const userData = localStorage.getItem('user');
-      if (userData) {
-        const user = JSON.parse(userData);
-        setMedicalInfo(user.medicalInformation || {
-          bloodType: '',
-          allergies: [],
-          conditions: [],
-          medications: [],
-          emergencyNotes: ''
-        });
-      }
-    } catch (error) {
-      console.error('Failed to fetch medical info:', error);
+  try {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      const user = JSON.parse(userData);
+      const medInfo = user.medicalInformation || {};
+      setMedicalInfo({
+        bloodType: medInfo.bloodType || '',
+        allergies: Array.isArray(medInfo.allergies) ? medInfo.allergies : [],
+        conditions: Array.isArray(medInfo.conditions) ? medInfo.conditions : [],
+        medications: Array.isArray(medInfo.medications) ? medInfo.medications : [],
+        emergencyNotes: medInfo.emergencyNotes || ''
+      });
     }
-  };
+  } catch (error) {
+    console.error('Failed to fetch medical info:', error);
+  }
+};
+
 
   const updateMedicalInfo = async () => {
     setLoading(true);
